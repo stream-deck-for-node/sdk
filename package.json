@@ -1,5 +1,5 @@
 {
-  "name": "elgato-stream-deck-sdk",
+  "name": "@stream-deck-for-node/sdk",
   "version": "1.0.0",
   "description": "Unofficial Elgato Stream Deck SDK for Node.js",
   "author": "Francesco Saverio Cannizzaro (fcannizzaro)",
@@ -10,8 +10,8 @@
     "node-ipc": "^10.1.0",
     "ws": "^8.3.0"
   },
-  "homepage": "https://stream-deck-for-node-js.github.io/docs/",
-  "repository": "github:stream-deck-for-node-js/elgato-stream-deck-sdk",
+  "homepage": "https://stream-deck-for-node.netlify.app",
+  "repository": "github:stream-deck-for-node/sdk",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "license": "GPL-3.0",
@@ -20,6 +20,9 @@
     "test": "mocha -r ts-node/register tests/index.ts tests/dev-index.ts --exit",
     "test:coverage": "nyc mocha -r ts-node/register tests/index.ts tests/dev-index.ts --exit",
     "build": "tsc --outDir lib"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "src",
