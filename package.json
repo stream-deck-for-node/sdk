@@ -1,0 +1,53 @@
+{
+  "name": "elgato-stream-deck-sdk",
+  "version": "1.0.0",
+  "description": "Unofficial Elgato Stream Deck SDK for Node.js",
+  "author": "Francesco Saverio Cannizzaro (fcannizzaro)",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "command-line-args": "^5.2.0",
+    "mime-types": "^2.1.34",
+    "node-ipc": "^10.1.0",
+    "ws": "^8.3.0"
+  },
+  "homepage": "https://stream-deck-for-node-js.github.io/docs/",
+  "repository": "github:stream-deck-for-node-js/elgato-stream-deck-sdk",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "license": "GPL-3.0",
+  "scripts": {
+    "prepublish": "npm run build",
+    "test": "mocha -r ts-node/register tests/index.ts tests/dev-index.ts --exit",
+    "test:coverage": "nyc mocha -r ts-node/register tests/index.ts tests/dev-index.ts --exit",
+    "build": "tsc --outDir lib"
+  },
+  "files": [
+    "src",
+    "package.json",
+    "lib/**/*.ts",
+    "lib/**/*.js",
+    "README.md",
+    "LICENSE",
+    "tsconfig.json"
+  ],
+  "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "@types/chai-spies": "^1.0.3",
+    "@types/command-line-args": "^5.2.0",
+    "@types/mime-types": "^2.1.1",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.11.12",
+    "@types/node-ipc": "^9.2.0",
+    "@types/ws": "^8.2.2",
+    "@typescript-eslint/eslint-plugin": "^5.8.1",
+    "@typescript-eslint/parser": "^5.8.1",
+    "chai": "^4.3.4",
+    "chai-spies": "^1.0.0",
+    "eslint": "^8.5.0",
+    "mocha": "^9.1.3",
+    "nyc": "^15.1.0",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  }
+}
