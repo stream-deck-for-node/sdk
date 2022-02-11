@@ -4,7 +4,7 @@
 <h1 align="center">Elgato Stream Deck SDK</h1>
 <p align="center">Unofficial Node.js SDK</p>
 <p align="center">
-  <a href="https://ci.appveyor.com/project/Stream-Deck-for-Node-js/sdk"><img src="https://img.shields.io/appveyor/build/Stream-Deck-for-Node-js/sdk"></a>
+  <a href="https://ci.appveyor.com/project/fcannizzaro/stream-deck-for-node-sdk"><img src="https://ci.appveyor.com/api/projects/status/aafqc84k1crqo6w6?svg=true"></a>
   <a href="https://www.npmjs.com/package/@stream-deck-for-node/sdk"><img src="https://img.shields.io/npm/v/@stream-deck-for-node/sdk?style=flat&color=red"></a>
   <img src="https://img.shields.io/badge/written%20in-TypeScript-blue?style=flat">
 </p>
