@@ -3,7 +3,7 @@ import {
     ApplicationChangedEvent,
     DeviceConnectionEvent,
     DeviceDisconnectionEvent,
-    KeyEvent,
+    KeyEvent, PluginSettingsChanged,
     PropertyInspectorEvent,
     PropertyInspectorMessagingEvent,
     SettingsChanged,
@@ -80,7 +80,7 @@ export interface IStreamDeck<S = any> {
 
     getSettings<T>(context: string): Promise<T>;
 
-    setPluginSettings(settings: S): void;
+    setPluginSettings(settings: Partial<S>): void;
 
     allContexts(): Record<string, string[]>;
 
@@ -122,7 +122,7 @@ export interface IBaseAction<T = any> {
 
     onSettingsChanged?: (_e: SettingsChanged<T>) => void;
 
-    onPluginSettingsChanged?: () => void;
+    onPluginSettingsChanged?: <S>(_e: PluginSettingsChanged<S>) => void;
 
     onSingleTap?: (_e: KeyEvent<T>) => void;
 

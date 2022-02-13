@@ -107,6 +107,11 @@ describe("Instance Settings", () => {
     expect(instanceSettings.instanceValue).to.equals(101);
   });
 
+  it("Verify the allContexts method", async () => {
+    const contexts = sd.allContexts();
+    expect(Object.keys(contexts)).to.have.length(1);
+  });
+
 });
 
 describe("Actions", () => {

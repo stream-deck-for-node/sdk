@@ -223,6 +223,8 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
         const { event, ...eventParams } = JSON.parse(message);
         const { action, context } = eventParams;
 
+        let params = eventParams;
+
         if (event !== "willDisappear" && action && context) {
             this.actions[action].contexts.add(context);
         }
@@ -234,6 +236,9 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
                 break;
             case "didReceiveGlobalSettings":
                 this.pluginSettings = eventParams.payload.settings;
+                params = {
+                    changedKeys: Object.keys(this.pluginSettings)
+                };
                 break;
             case "keyDown":
             case "keyUp":
@@ -248,7 +253,7 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
         }
 
         // emit to the internal events system
-        this.redirect(event, eventParams);
+        this.redirect(event, params);
 
     }
 
@@ -346,15 +351,22 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
         });
     }
 
-    setPluginSettings(settings: S) {
+    setPluginSettings(settings: Partial<S>) {
+
+        // update global settings
+        Object.assign(this.pluginSettings, settings);
+
         this.send({
             event: "setGlobalSettings",
             context: this.uuid,
-            payload: settings
+            payload: this.pluginSettings
         });
-        // update global settings
-        this.pluginSettings = settings;
-        Object.values(this.actions).forEach(registered => registered?.onPluginSettingsChanged?.call(registered));
+
+        // send the changed keys to every action to prevent useless render
+        const event = {
+            changedKeys: Object.keys(settings)
+        };
+        Object.values(this.actions).forEach(registered => registered?.onPluginSettingsChanged?.call(registered, event));
     }
 
     setImage(context: string, image: string, options: { target?: 0 | 1 | 2; state?: 0 | 1 } = {}) {

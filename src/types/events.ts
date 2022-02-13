@@ -94,6 +94,10 @@ export interface PropertyInspectorMessagingEvent {
   payload: Record<string, any>;
 }
 
+export interface PluginSettingsChanged<S = any> {
+  changedKeys: Array<keyof S>;
+}
+
 export const EVENT_MAPPING = {
   keyDown: "onKeyDown",
   keyUp: "onKeyUp",
