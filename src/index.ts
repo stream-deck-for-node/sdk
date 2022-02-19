@@ -45,7 +45,6 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
         process.argv = process.argv.map(it => it.startsWith("-") ? `-${it}` : it);
 
         // Get stream deck commandline arguments
-        // Get stream deck commandline arguments
         const flags = commandLineArgs([
             { name: "debug", type: String },
             { name: "port", type: String },
@@ -101,7 +100,15 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
 
         this.ws.on("message", (msg: any) => this.onMessage.bind(this)(msg));
 
-        this.ws.on("close", () => process.exit());
+        // If the websocket is closed or has an error kill the plugin
+
+        this.ws.on("close", () => {
+            process.exit();
+        });
+
+        this.ws.on("error", () => {
+            process.exit();
+        });
 
         // register every annotated class
         for (const [suffix, clazz] of registeredClasses) {
@@ -351,10 +358,19 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
         });
     }
 
+    resetPluginSettings() {
+        this.setPluginSettings({});
+    }
+
     setPluginSettings(settings: Partial<S>) {
 
-        // update global settings
-        Object.assign(this.pluginSettings, settings);
+        if (!Object.keys(settings).length) {
+            // reset global settings
+            this.pluginSettings = <any>{};
+        } else {
+            // update global settings
+            Object.assign(this.pluginSettings, settings);
+        }
 
         this.send({
             event: "setGlobalSettings",

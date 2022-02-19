@@ -18,13 +18,20 @@ export class MockConnector {
         this.id = "debug-plugin:" + uuid;
     }
 
+    killProcess() {
+        process.exit();
+    }
+
     load(): Promise<BinaryArguments> {
         return new Promise((res) => {
             ipc.connectTo(this.id, () => {
                   this.connection = ipc.of[this.id];
-                  this.connection.on("binary-args", (data: any) => {
-                      res(data);
-                  });
+                  this.connection.on("binary-args", (data: any) => res(data));
+                  // on application close kill the node process
+                  this.connection.on("disconnect", this.killProcess);
+                  this.connection.on("destroy", this.killProcess);
+                  this.connection.on("error", this.killProcess);
+                  this.connection.on("socket.disconnected", this.killProcess);
               }
             );
         });

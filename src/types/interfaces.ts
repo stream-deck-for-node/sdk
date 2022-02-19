@@ -82,6 +82,8 @@ export interface IStreamDeck<S = any> {
 
     setPluginSettings(settings: Partial<S>): void;
 
+    resetPluginSettings(): void;
+
     allContexts(): Record<string, string[]>;
 
     openUrl(url: string): void;
