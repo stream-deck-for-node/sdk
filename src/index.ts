@@ -11,7 +11,6 @@ import { EVENT_MAPPING } from "./types/events";
 import { TextDecoder } from "util";
 import { imageToBase64 } from "./util/image-helper";
 import { registeredClasses } from "./class-style/decorator";
-import { MockConnector } from "./util/debug-connector";
 import commandLineArgs from "command-line-args";
 import { BaseAction } from "./class-style/BaseAction";
 
@@ -65,7 +64,7 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
 
             if (args.debug) {
                 // development connector acting as websocket
-                this.ws = new MockConnector(args.debug);
+                // this.ws = new MockConnector(args.debug);
                 Object.assign(args, await this.ws.load?.() || {});
             }
 
