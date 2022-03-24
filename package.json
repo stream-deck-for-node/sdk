@@ -1,6 +1,6 @@
 {
   "name": "@stream-deck-for-node/sdk",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "description": "Unofficial Elgato Stream Deck SDK for Node.js",
   "author": "Francesco Saverio Cannizzaro (fcannizzaro)",
   "dependencies": {

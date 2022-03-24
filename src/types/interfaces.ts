@@ -92,7 +92,7 @@ export interface IStreamDeck<S = any> {
 
     setTitle(context: string, title: string, options: { target: 0 | 1 | 2, state: 0 | 1 }): void;
 
-    setImage(context: string, image: string, options: { target: 0 | 1 | 2, state: 0 | 1 }): void;
+    setImage(context: string, image: string, options: { target: 0 | 1 | 2, state: 0 | 1, useCache: boolean }): void;
 
     showAlert(context: string): void;
 
