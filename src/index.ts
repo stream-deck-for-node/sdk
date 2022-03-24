@@ -91,6 +91,14 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
       });
     });
 
+    this.ws.on("close", () => {
+      process.exit();
+    });
+
+    this.ws.on("error", () => {
+      process.exit();
+    });
+
     this.ws.on("message", (msg: any) => this.onMessage.bind(this)(msg));
 
     // register every annotated class
