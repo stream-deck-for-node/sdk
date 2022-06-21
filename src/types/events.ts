@@ -9,14 +9,14 @@ export interface KeyEvent<T = any> {
   context: string;
   device: string;
   payload: {
-    settings: T
+    settings: T;
     coordinates: {
-      column: number
-      row: number
-    }
-    state: 0 | 1
-    userDesiredState: 0 | 1
-    isInMultiAction: boolean
+      column: number;
+      row: number;
+    };
+    state: 0 | 1;
+    userDesiredState: 0 | 1;
+    isInMultiAction: boolean;
   };
 }
 
@@ -25,13 +25,13 @@ export interface AppearDisappearEvent<T = any> {
   context: string;
   device: string;
   payload: {
-    settings: T
+    settings: T;
     coordinates: {
-      column: number
-      row: number
-    }
-    state: 0 | 1
-    isInMultiAction: boolean
+      column: number;
+      row: number;
+    };
+    state: 0 | 1;
+    isInMultiAction: boolean;
   };
 }
 
@@ -40,34 +40,34 @@ export interface TitleParametersDidChangeEvent<T = any> {
   context: string;
   device: string;
   payload: {
-    settings: T
+    settings: T;
     coordinates: {
-      column: number
-      row: number
-    }
-    state: 0 | 1
-    title: string
+      column: number;
+      row: number;
+    };
+    state: 0 | 1;
+    title: string;
     titleParameters: {
-      fontFamily: string
-      fontSize: number
-      fontStyle: string
-      fontUnderline: boolean
-      showTitle: boolean
-      titleAlignment: "top" | "bottom" | "middle"
-      titleColor: string
-    }
+      fontFamily: string;
+      fontSize: number;
+      fontStyle: string;
+      fontUnderline: boolean;
+      showTitle: boolean;
+      titleAlignment: 'top' | 'bottom' | 'middle';
+      titleColor: string;
+    };
   };
 }
 
 export interface DeviceConnectionEvent {
   device: string;
   deviceInfo: {
-    name: string
-    type: 0 | 1 | 2 | 3 | 4
+    name: string;
+    type: 0 | 1 | 2 | 3 | 4;
     size: {
-      rows: number
-      columns: number
-    }
+      rows: number;
+      columns: number;
+    };
   };
 }
 
@@ -77,7 +77,7 @@ export interface DeviceDisconnectionEvent {
 
 export interface ApplicationChangedEvent {
   payload: {
-    application: string
+    application: string;
   };
 }
 
@@ -99,18 +99,17 @@ export interface PluginSettingsChanged<S = any> {
 }
 
 export const EVENT_MAPPING = {
-  keyDown: "onKeyDown",
-  keyUp: "onKeyUp",
-  sendToPlugin: "onMessageFromPropertyInspector",
-  propertyInspectorDidDisappear: "onPropertyInspectorAppear",
-  willAppear: "onAppear",
-  willDisappear: "onDisappear",
-  onSingleTap: "onSingleTap",
-  onDoubleTap: "onDoubleTap",
-  onLongPress: "onLongPress",
-  onPropertyInspectorAppear: "onPropertyInspectorAppear",
-  onSettingsChanged: "onSettingsChanged",
-  didReceiveGlobalSettings: "onPluginSettingsChanged",
-  titleParametersDidChange: "onTitleParametersChanged"
+  keyDown: 'onKeyDown',
+  keyUp: 'onKeyUp',
+  sendToPlugin: 'onMessageFromPropertyInspector',
+  propertyInspectorDidDisappear: 'onPropertyInspectorAppear',
+  willAppear: 'onAppear',
+  willDisappear: 'onDisappear',
+  onSingleTap: 'onSingleTap',
+  onDoubleTap: 'onDoubleTap',
+  onLongPress: 'onLongPress',
+  onPropertyInspectorAppear: 'onPropertyInspectorAppear',
+  onSettingsChanged: 'onSettingsChanged',
+  didReceiveGlobalSettings: 'onPluginSettingsChanged',
+  titleParametersDidChange: 'onTitleParametersChanged'
 };
-
