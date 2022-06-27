@@ -10,7 +10,7 @@ import {
 import { EVENT_MAPPING } from './types/events';
 import { TextDecoder } from 'util';
 import { imageToBase64 } from './util/image-helper';
-import { registeredClasses } from './class-style/decorator';
+import { registeredClasses, updatePeriods } from './class-style/decorator';
 import commandLineArgs from 'command-line-args';
 import { BaseAction } from './class-style/BaseAction';
 import { readFileSync } from 'fs';
@@ -19,6 +19,8 @@ import { tmpdir } from 'os';
 export { Action } from './class-style/decorator';
 export { BaseAction } from './class-style/BaseAction';
 export * from './types/events';
+
+export { geometry } from './device';
 
 export class StreamDeck<S = any> implements IStreamDeck<S> {
   private ws: StreamDeckConnector;
@@ -101,7 +103,14 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
 
     // register every annotated class
     for (const [suffix, clazz] of registeredClasses) {
-      this.register(suffix, new clazz());
+      const uuid = this.register(suffix, new clazz());
+      const period = updatePeriods[suffix];
+      if (period) {
+        setInterval(() => {
+          const action = this.actions[uuid];
+          action && action.onPeriodicUpdate?.call(action);
+        }, period);
+      }
     }
 
     for (const [suffix, action] of Object.entries(options.actions || {})) {
@@ -132,6 +141,7 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
     delete this.longPressTimeouts[context];
     delete this.doublePressTimeouts[context];
     delete this.taps[context];
+    delete this.settingsManager[context];
   }
 
   private checkMultiTap(event: string, eventParams: any) {
@@ -220,6 +230,9 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
     }
 
     switch (event) {
+      case 'willAppear':
+        this.settingsManager[context] = params.payload.settings;
+        break;
       case 'willDisappear':
         this.actions[action]?.contexts.delete(context);
         this.cleanup(context);
@@ -270,24 +283,12 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
     }
   }
 
-  getSettings<S>(context: string): Promise<S> {
-    const checkSettings = (res: (settings: S) => void) => {
-      const settings = this.settingsManager[context];
-      if (settings) {
-        res(settings);
-      } else {
-        setTimeout(() => checkSettings(res), 25);
-      }
-    };
-    return new Promise((res) => {
-      this.send({
-        event: 'getSettings',
-        context
-      });
-      checkSettings(res);
-    });
+  // get the settings of a tile
+  getSettings<S>(context: string): S {
+    return this.settingsManager[context];
   }
 
+  // get all registered actions' tiles
   allContexts() {
     return Object.fromEntries(
       Object.values(this.actions).map((it) => [
@@ -297,8 +298,13 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
     );
   }
 
+  // get an action's tiles
+  contextsOf(action: string) {
+    return Array.from(this.actions[action]?.contexts ?? []);
+  }
+
   // register an action using its uuid (suffix)
-  register(suffix: string, action: BaseAction) {
+  register(suffix: string, action: BaseAction): string {
     const uuid = `${this.info.plugin.uuid}.${suffix}`;
     Object.assign(action, {
       uuid,
@@ -310,6 +316,7 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
       event: 'getGlobalSettings',
       context: this.uuid
     });
+    return uuid;
   }
 
   // Events Sent

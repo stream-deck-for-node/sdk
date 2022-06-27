@@ -21,6 +21,19 @@ export interface StreamDeckConnector {
   send(data: any): void;
 }
 
+export enum DeviceType {
+  StreamDeck,
+  StreamDeckMini,
+  StreamDeckXL,
+  StreamDeckMobile,
+  CorsairGKeys,
+  StreamDeckPedal
+}
+
+export type ActionTarget = 0 | 1 | 2;
+
+export type ActionState = 0 | 1;
+
 export interface BinaryArguments {
   debug: string;
   port: string;
@@ -36,7 +49,7 @@ export interface Device {
     rows: number;
     columns: number;
   };
-  type: 0 | 1 | 2 | 3 | 4;
+  type: DeviceType;
 }
 
 export interface Application {
@@ -77,13 +90,15 @@ export interface IStreamDeck<S = any> {
 
   setSettings(context: string, settings: Record<string, any>): void;
 
-  getSettings<T>(context: string): Promise<T>;
+  getSettings<T>(context: string): T;
 
   setPluginSettings(settings: Partial<S>): void;
 
   resetPluginSettings(): void;
 
   allContexts(): Record<string, string[]>;
+
+  contextsOf(action: string): string[];
 
   openUrl(url: string): void;
 
@@ -92,20 +107,20 @@ export interface IStreamDeck<S = any> {
   setTitle(
     context: string,
     title: string,
-    options: { target: 0 | 1 | 2; state: 0 | 1 }
+    options: { target: ActionTarget; state: ActionState }
   ): void;
 
   setImage(
     context: string,
     image: string,
-    options: { target: 0 | 1 | 2; state: 0 | 1; useCache: boolean }
+    options: { target: ActionTarget; state: ActionState; useCache: boolean }
   ): void;
 
   showAlert(context: string): void;
 
   showOk(context: string): void;
 
-  setState(context: string, state: 0 | 1): void;
+  setState(context: string, state: ActionState): void;
 
   switchToProfile(context: string, device: string, profile: string): void;
 
@@ -130,6 +145,8 @@ export interface IBaseAction<T = any> {
   onKeyDown?: (_e: KeyEvent<T>) => void;
 
   onKeyUp?: (_e: KeyEvent<T>) => void;
+
+  onPeriodicUpdate?: () => void;
 
   onSettingsChanged?: (_e: SettingsChanged<T>) => void;
 
@@ -168,4 +185,25 @@ export interface IAction<T = any> extends IBaseAction<T> {
   pluginUUID?: string;
 
   contexts: Set<string>;
+}
+
+export interface AutoRunTimeUnits {
+  h?: number;
+  m?: number;
+  s?: number;
+  ms?: number;
+}
+
+export interface DeviceGeometry {
+  topLeft: [number, number];
+  topRight: [number, number];
+  bottomLeft: [number, number];
+  bottomRight: [number, number];
+  // perfect
+  center?: [number, number];
+  // approximated
+  approximatedCenter?: [number, number];
+  total: number;
+  rows: number;
+  columns: number;
 }
