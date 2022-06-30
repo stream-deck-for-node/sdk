@@ -58,7 +58,7 @@ export const geometry = (deviceType: DeviceType) => {
       type: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'center'
     ) => {
       const [r1, c1] = positions[type] || [];
-      return r !== r1 && c !== c1;
+      return r !== r1 || c !== c1;
     }
   };
 };
