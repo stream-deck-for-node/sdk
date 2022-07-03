@@ -1,3 +1,8 @@
+export interface EventCoordinates {
+  column: number;
+  row: number;
+}
+
 export interface SettingsChanged<T = any> {
   context: string;
   action: string;
@@ -10,10 +15,7 @@ export interface KeyEvent<T = any> {
   device: string;
   payload: {
     settings: T;
-    coordinates: {
-      column: number;
-      row: number;
-    };
+    coordinates: EventCoordinates;
     state: 0 | 1;
     userDesiredState: 0 | 1;
     isInMultiAction: boolean;
@@ -26,10 +28,7 @@ export interface AppearDisappearEvent<T = any> {
   device: string;
   payload: {
     settings: T;
-    coordinates: {
-      column: number;
-      row: number;
-    };
+    coordinates: EventCoordinates;
     state: 0 | 1;
     isInMultiAction: boolean;
   };
@@ -41,10 +40,7 @@ export interface TitleParametersDidChangeEvent<T = any> {
   device: string;
   payload: {
     settings: T;
-    coordinates: {
-      column: number;
-      row: number;
-    };
+    coordinates: EventCoordinates;
     state: 0 | 1;
     title: string;
     titleParameters: {

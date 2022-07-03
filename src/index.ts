@@ -1,13 +1,17 @@
 import WebSocket from 'ws';
 import {
   BinaryArguments,
+  Device,
+  DeviceType,
+  DynamicCell,
+  DynamicViewInstance,
   IAction,
   IStreamDeck,
   StreamDeckConnector,
   StreamDeckInfo,
   StreamDeckOptions
 } from './types/interfaces';
-import { EVENT_MAPPING } from './types/events';
+import { AppearDisappearEvent, EVENT_MAPPING, KeyEvent } from './types/events';
 import { TextDecoder } from 'util';
 import { imageToBase64 } from './util/image-helper';
 import { registeredClasses, updatePeriods } from './class-style/decorator';
@@ -15,16 +19,21 @@ import commandLineArgs from 'command-line-args';
 import { BaseAction } from './class-style/BaseAction';
 import { readFileSync } from 'fs';
 import { tmpdir } from 'os';
+import { DynamicView } from './dynamic-view/DynamicView';
+import { Subject, Subscription } from 'rxjs';
 
 export { Action } from './class-style/decorator';
 export { BaseAction } from './class-style/BaseAction';
 export * from './types/events';
 
 export { geometry } from './device';
+export { DynamicView } from './dynamic-view/DynamicView';
 
 export class StreamDeck<S = any> implements IStreamDeck<S> {
   private ws: StreamDeckConnector;
   public actions: Record<string, IAction> = {};
+
+  private readyObserver = new Subject();
 
   // The plugin infos
   public uuid: string;
@@ -40,6 +49,7 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
   private longPressTimeouts: Record<string, any> = {};
   private latestLongPress: Record<string, boolean> = {};
   private pressed: Record<string, boolean> = {};
+  private subscriptions: Record<string, Subscription> = {};
 
   constructor(options: StreamDeckOptions = {}) {
     // fix arguments dash broken :D
@@ -114,7 +124,7 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
     }
 
     for (const [suffix, action] of Object.entries(options.actions || {})) {
-      this.register(suffix, Object.assign({}, action(this)));
+      this.register(suffix, Object.assign({}, action));
     }
   }
 
@@ -202,7 +212,6 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
     action: string,
     settings: any
   ) {
-    this.settingsManager[context] = settings;
     this.redirect('onSettingsChanged', {
       context,
       action,
@@ -239,6 +248,11 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
         break;
       case 'didReceiveGlobalSettings':
         this.pluginSettings = eventParams.payload.settings;
+
+        if (!this.readyObserver.closed) {
+          this.readyObserver.next(true);
+        }
+
         params = {
           changedKeys: Object.keys(this.pluginSettings)
         };
@@ -248,6 +262,8 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
         this.checkMultiTap(event, eventParams);
         break;
       case 'didReceiveSettings':
+        this.settingsManager[eventParams.context] =
+          eventParams.payload.settings;
         return this.notifySettingsChanged(
           eventParams.context,
           eventParams.action,
@@ -286,6 +302,85 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
   // get the settings of a tile
   getSettings<S>(context: string): S {
     return this.settingsManager[context];
+  }
+
+  // register ready event
+  async ready() {
+    return new Promise<void>((resolve) => {
+      this.readyObserver.subscribe(() => {
+        resolve();
+        this.readyObserver.complete();
+      });
+    });
+  }
+
+  // register dynamic view action
+  registerDynamicView(suffix: string, profile: string) {
+    const dynamicView = new DynamicView();
+    this.register(
+      suffix,
+      Object.assign(
+        { contexts: new Set<string>() },
+        {
+          binder: undefined,
+          onDisappear: (e: AppearDisappearEvent) => {
+            this.subscriptions[e.context]?.unsubscribe();
+          },
+          onSingleTap: (e: KeyEvent) => {
+            dynamicView
+              .for(e.device)
+              ?.cell(e.payload.coordinates)
+              ?.onSingleTap?.();
+          },
+          onDoubleTap: (e: KeyEvent) => {
+            dynamicView
+              .for(e.device)
+              ?.cell(e.payload.coordinates)
+              ?.onDoubleTap?.();
+          },
+          onLongPress: (e: KeyEvent) => {
+            dynamicView
+              .for(e.device)
+              ?.cell(e.payload.coordinates)
+              ?.onLongPress?.();
+          },
+          onAppear: (e: AppearDisappearEvent) => {
+            const onUpdate = (cell: DynamicCell | null) => {
+              this.setTitle(e.context, cell?.title ?? '');
+              this.setImage(e.context, cell?.image);
+            };
+            const [value, bind] =
+              dynamicView
+                .for(e.device)
+                ?.subscribe(e.payload.coordinates, onUpdate, e.context) ?? [];
+
+            if (value) {
+              this.subscriptions[e.context] = bind;
+              onUpdate(value);
+            }
+          }
+        }
+      )
+    );
+    return {
+      show: (
+        device: Device,
+        except: DeviceType[] = []
+      ): DynamicViewInstance | undefined => {
+        if (except.includes(device.type)) {
+          return;
+        }
+        const instance = dynamicView.bind(device, this);
+        this.switchToProfile(this.uuid, device.id, profile);
+        return instance;
+      },
+      storeSettings: (device: string, context: string) => {
+        dynamicView.for(device)?.storeSettings(context);
+      },
+      hide: (device: string) => {
+        dynamicView.for(device)?.hide();
+      }
+    };
   }
 
   // get all registered actions' tiles
@@ -407,6 +502,9 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
     const action = Object.values(this.actions).find((it) =>
       it.contexts?.has(context)
     )?.uuid;
+
+    this.settingsManager[context] = settings;
+
     if (action) {
       this.notifySettingsChanged(context, action, settings);
     }

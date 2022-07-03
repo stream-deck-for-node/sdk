@@ -1,64 +1,64 @@
-import { DeviceGeometry, DeviceType } from './types/interfaces';
+import {
+  DeviceGeometry,
+  DeviceGeometryPositions,
+  DeviceType
+} from './types/interfaces';
 
-const BaseStreamDeck: DeviceGeometry = {
-  topLeft: [0, 0],
-  topRight: [0, 4],
-  bottomLeft: [2, 0],
-  bottomRight: [2, 4],
-  center: [1, 2],
+const BaseStreamDeck: DeviceGeometryPositions = {
+  topLeft: 0,
+  topRight: 4,
+  bottomLeft: 10,
+  bottomRight: 14,
+  center: 7,
   total: 3 * 5,
   rows: 3,
   columns: 5
 };
 
-const positionsIndex: Record<DeviceType, DeviceGeometry | undefined> = {
+const positionsIndex: Record<DeviceType, DeviceGeometryPositions> = {
   [DeviceType.StreamDeck]: BaseStreamDeck,
   [DeviceType.StreamDeckMini]: {
-    topLeft: [0, 0],
-    topRight: [0, 2],
-    bottomLeft: [1, 0],
-    bottomRight: [1, 2],
-    approximatedCenter: [0, 1],
+    topLeft: 0,
+    topRight: 2,
+    bottomLeft: 3,
+    bottomRight: 5,
+    approximatedCenter: 1,
     total: 2 * 3,
     rows: 2,
     columns: 3
   },
   [DeviceType.StreamDeckXL]: {
-    topLeft: [0, 0],
-    topRight: [0, 7],
-    bottomLeft: [4, 0],
-    bottomRight: [4, 7],
-    approximatedCenter: [2, 3],
+    topLeft: 0,
+    topRight: 7,
+    bottomLeft: 24,
+    bottomRight: 31,
+    approximatedCenter: 11,
     total: 4 * 8,
     rows: 4,
     columns: 8
   },
-  [DeviceType.StreamDeckMobile]: BaseStreamDeck,
-  [DeviceType.StreamDeckPedal]: undefined,
-  [DeviceType.CorsairGKeys]: undefined
+  [DeviceType.StreamDeckMobile]: BaseStreamDeck
 };
 
-export const geometry = (deviceType: DeviceType) => {
+export const geometry = (deviceType: DeviceType): DeviceGeometry => {
   const positions = positionsIndex[deviceType];
-  if (!positions) {
-    return;
-  }
   return {
-    positions,
-    forEach: (cb: (r: number, c: number, i: number) => void) => {
-      for (let i = 0; i < positions.rows; i++) {
-        for (let j = 0; j < positions.columns; j++) {
-          cb(i, j, i * positions?.columns + j);
-        }
-      }
-    },
-    isNot: (
-      r: number,
-      c: number,
-      type: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | 'center'
+    ...positions,
+    total: positions.total,
+    columns: positions.columns,
+    rows: positions.rows,
+
+    mappable: (
+      ...except: Exclude<
+        keyof DeviceGeometryPositions,
+        'total' | 'rows' | 'columns'
+      >[]
     ) => {
-      const [r1, c1] = positions[type] || [];
-      return r !== r1 || c !== c1;
+      const excludedIndexes = except.map((it) => positions[it]);
+      const validPositions = Array.from(new Array(positions.total))
+        .map((_, i) => i)
+        .filter((it) => !excludedIndexes.includes(it));
+      return [validPositions, positions.total - validPositions.length];
     }
   };
 };

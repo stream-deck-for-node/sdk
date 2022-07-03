@@ -3,6 +3,7 @@ import {
   ApplicationChangedEvent,
   DeviceConnectionEvent,
   DeviceDisconnectionEvent,
+  EventCoordinates,
   KeyEvent,
   PluginSettingsChanged,
   PropertyInspectorEvent,
@@ -11,6 +12,7 @@ import {
   TitleParametersDidChangeEvent
 } from './events';
 import { BaseAction } from '../class-style/BaseAction';
+import Rx, { Subscription } from 'rxjs';
 
 export interface StreamDeckConnector {
   readyState: number;
@@ -25,9 +27,7 @@ export enum DeviceType {
   StreamDeck,
   StreamDeckMini,
   StreamDeckXL,
-  StreamDeckMobile,
-  CorsairGKeys,
-  StreamDeckPedal
+  StreamDeckMobile
 }
 
 export type ActionTarget = 0 | 1 | 2;
@@ -88,6 +88,8 @@ export interface IStreamDeck<S = any> {
 
   settings?: S;
 
+  ready: () => Promise<void>;
+
   setSettings(context: string, settings: Record<string, any>): void;
 
   getSettings<T>(context: string): T;
@@ -99,6 +101,15 @@ export interface IStreamDeck<S = any> {
   allContexts(): Record<string, string[]>;
 
   contextsOf(action: string): string[];
+
+  registerDynamicView(
+    suffix: string,
+    profile: string
+  ): {
+    show: (device: Device) => void;
+    hide: (device: string) => void;
+    storeSettings: (device: string, context: string) => void;
+  };
 
   openUrl(url: string): void;
 
@@ -134,7 +145,7 @@ export interface IStreamDeck<S = any> {
 export interface StreamDeckOptions {
   doubleTapMillis?: number;
   longPressMillis?: number;
-  actions?: Record<string, (sd: IStreamDeck) => BaseAction>;
+  actions?: Record<string, BaseAction>;
 }
 
 export interface IBaseAction<T = any> {
@@ -194,16 +205,57 @@ export interface AutoRunTimeUnits {
   ms?: number;
 }
 
-export interface DeviceGeometry {
-  topLeft: [number, number];
-  topRight: [number, number];
-  bottomLeft: [number, number];
-  bottomRight: [number, number];
-  // perfect
-  center?: [number, number];
-  // approximated
-  approximatedCenter?: [number, number];
+export interface DeviceGeometryPositions {
+  topLeft: number;
+  topRight: number;
+  bottomLeft: number;
+  bottomRight: number;
+  center?: number; // perfect
+  approximatedCenter?: number; // approximated
   total: number;
   rows: number;
   columns: number;
 }
+
+export interface DeviceGeometry extends DeviceGeometryPositions {
+  mappable: (
+    ...except: Exclude<
+      keyof DeviceGeometryPositions,
+      'total' | 'rows' | 'columns'
+    >[]
+  ) => [number[], number];
+}
+
+export interface DynamicCell {
+  source?: any;
+  title?: string;
+  image?: string;
+  onSingleTap?: () => void;
+  onDoubleTap?: () => void;
+  onLongPress?: () => void;
+  data?: Record<string, any>;
+}
+
+export interface DynamicViewInstance {
+  settings: Record<string, any>;
+  view: DynamicViewMatrix;
+  geometry: DeviceGeometry;
+  page: number;
+  nextPage: (maxPages: number) => boolean;
+  prevPage: (alternative?: () => void) => boolean;
+  clear: () => void;
+  hide: () => void;
+  update: (index: number, cell: DynamicCell) => void;
+  cell: (coords: EventCoordinates) => DynamicCell | null;
+  setSettings: (context: string, settings: any) => void;
+  storeSettings: (context: string) => void;
+  subscribe: (
+    coords: EventCoordinates,
+    subscriber: (value: DynamicCell) => void,
+    context: string
+  ) => [DynamicCell | null, Subscription];
+  unsubscribe: (coords: EventCoordinates) => void;
+}
+
+// Single Index Matrix
+export type DynamicViewMatrix = Rx.BehaviorSubject<DynamicCell | null>[];
