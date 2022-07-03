@@ -246,6 +246,7 @@ export interface DynamicViewInstance {
   clear: () => void;
   hide: () => void;
   update: (index: number, cell: DynamicCell) => void;
+  onTapOutside: (cb: () => void) => void;
   cell: (coords: EventCoordinates) => DynamicCell | null;
   setSettings: (context: string, settings: any) => void;
   storeSettings: (context: string) => void;

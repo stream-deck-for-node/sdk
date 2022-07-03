@@ -13,7 +13,7 @@ export class DynamicViewInstance {
   public view: DynamicViewMatrix = [];
   public geometry: DeviceGeometry;
   public page = 0;
-
+  public outsideListener?: () => void;
   public settings = {};
 
   setSettings(context: string, settings: any) {
@@ -54,6 +54,10 @@ export class DynamicViewInstance {
     this.view = Array.from(new Array(this.geometry.total)).map(
       () => new BehaviorSubject(null)
     );
+  }
+
+  onTapOutside(cb: () => void) {
+    this.outsideListener = cb;
   }
 
   update(index: number, cell: DynamicCell) {

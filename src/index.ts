@@ -327,10 +327,10 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
             this.subscriptions[e.context]?.unsubscribe();
           },
           onSingleTap: (e: KeyEvent) => {
-            dynamicView
-              .for(e.device)
-              ?.cell(e.payload.coordinates)
-              ?.onSingleTap?.();
+            const dv = dynamicView.for(e.device);
+            const fn =
+              dv.cell(e.payload.coordinates)?.onSingleTap ?? dv.outsideListener;
+            fn && fn();
           },
           onDoubleTap: (e: KeyEvent) => {
             dynamicView
