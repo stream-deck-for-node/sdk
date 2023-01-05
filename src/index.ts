@@ -40,7 +40,7 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
   public info: StreamDeckInfo;
   private doubleTapMillis: number;
   private longPressMillis: number;
-  public pluginSettings: S = <any>{};
+  public pluginSettings: Partial<S> = <any>{};
   public settingsManager: Record<string, any> = {};
 
   // group of records to identify specific events
@@ -457,6 +457,7 @@ export class StreamDeck<S = any> implements IStreamDeck<S> {
       // reset global settings
       this.pluginSettings = <any>{};
     } else {
+
       // update global settings
       Object.assign(this.pluginSettings, settings);
     }
