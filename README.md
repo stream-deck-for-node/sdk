@@ -6,9 +6,6 @@
 ------
 
 
-<p align="center">
-  <img src="https://stream-deck-for-node.netlify.app/_media/icon.png">
-</p>
 <h1 align="center">Elgato Stream Deck SDK</h1>
 <p align="center">Unofficial Node.js SDK</p>
 <p align="center">
