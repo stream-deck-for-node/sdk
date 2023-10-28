@@ -1,3 +1,11 @@
+# [Elgato released an official Node.js sdk](https://github.com/elgatosf/streamdeck)
+> Now they support Node.js plugins, hot reload and more.
+> 
+> _This project is now archived_
+
+------
+
+
 <p align="center">
   <img src="https://stream-deck-for-node.netlify.app/_media/icon.png">
 </p>
